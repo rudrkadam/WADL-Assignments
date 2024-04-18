@@ -1,0 +1,153 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Management</title>
+</head>
+<body>
+  <h2>Add a New Book</h2>
+  <form id="addBookForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required><br><br>
+    <label for="author">Author:</label>
+    <input type="text" id="author" name="author" required><br><br>
+    <label for="price">Price:</label>
+    <input type="number" id="price" name="price" required><br><br>
+    <button type="button" onclick="addBook()">Add Book</button>
+  </form>
+
+  <hr>
+
+  <h2>Get Book Information</h2>
+  <form id="getBookForm">
+    <label for="bookName">Book Name:</label>
+    <input type="text" id="bookName" name="bookName" required><br><br>
+    <button type="button" onclick="getBookInfo()">Get Info</button>
+  </form>
+
+  <div id="bookInfo"></div>
+
+  <hr>
+
+  <h2>Delete Book</h2>
+  <form id="deleteBookForm">
+    <label for="deleteBookName">Book Name:</label>
+    <input type="text" id="deleteBookName" name="deleteBookName" required><br><br>
+    <button type="button" onclick="deleteBook()">Delete Book</button>
+  </form>
+
+  <hr>
+
+  <h2>Update Book Price</h2>
+  <form id="updateBookPriceForm">
+    <label for="updateBookName">Book Name:</label>
+    <input type="text" id="updateBookName" name="updateBookName" required><br><br>
+    <label for="newPrice">New Price:</label>
+    <input type="number" id="newPrice" name="newPrice" required><br><br>
+    <button type="button" onclick="updateBookPrice()">Update Price</button>
+  </form>
+
+  <script>
+    async function addBook() {
+      const name = document.getElementById('name').value;
+      const author = document.getElementById('author').value;
+      const price = document.getElementById('price').value;
+      
+      try {
+        const response = await fetch('http://localhost:3000/books', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name, author, price })
+        });
+        
+        if (response.ok) {
+          alert('Book added successfully');
+          // Clear form fields after successful submission
+          document.getElementById('name').value = '';
+          document.getElementById('author').value = '';
+          document.getElementById('price').value = '';
+        } else {
+          throw new Error('Failed to add book');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to add book');
+      }
+    }
+
+    async function getBookInfo() {
+      const bookName = document.getElementById('bookName').value;
+      
+      try {
+        const response = await fetch(`http://localhost:3000/books/${bookName}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          const bookInfoDiv = document.getElementById('bookInfo');
+          bookInfoDiv.innerHTML = `<p><strong>Name:</strong> ${data.name}</p>
+                                   <p><strong>Author:</strong> ${data.author}</p>
+                                   <p><strong>Price:</strong> ${data.price}</p>`;
+        } else {
+          throw new Error(data.error || 'Failed to retrieve book information');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        const bookInfoDiv = document.getElementById('bookInfo');
+        bookInfoDiv.textContent = 'Error retrieving book information';
+      }
+    }
+
+    async function deleteBook() {
+      const bookName = document.getElementById('deleteBookName').value;
+      
+      try {
+        const response = await fetch(`http://localhost:3000/books/${bookName}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          alert('Book deleted successfully');
+          // Clear form field after successful deletion
+          document.getElementById('deleteBookName').value = '';
+        } else {
+          throw new Error('Failed to delete book');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to delete book');
+      }
+    }
+
+    async function updateBookPrice() {
+      const bookName = document.getElementById('updateBookName').value;
+      const newPrice = document.getElementById('newPrice').value;
+      
+      try {
+        const response = await fetch(`http://localhost:3000/books/${bookName}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ newPrice })
+        });
+        
+        if (response.ok) {
+          alert('Book price updated successfully');
+          // Clear form fields after successful submission
+          document.getElementById('updateBookName').value = '';
+          document.getElementById('newPrice').value = '';
+        } else {
+          throw new Error('Failed to update book price');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to update book price');
+      }
+    }
+  </script>
+</body>
+</html>
